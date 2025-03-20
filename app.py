@@ -1326,7 +1326,7 @@ elif opciones == "Informes":
         def estilo_fila(row):
             if 'concepto' in row.index:  # Verifica si la columna existe
                 if row.get('concepto', '').startswith(('A)', 'B)', 'C)', 'D)')):
-                return ['background-color: #E3F2FD; font-weight: bold;'] * len(row)
+                    return ['background-color: #E3F2FD; font-weight: bold;'] * len(row)
             return [''] * len(row)
         
         # Mostrar tabla

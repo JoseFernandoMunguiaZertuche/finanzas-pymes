@@ -1,5 +1,3 @@
-import streamlit as st
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -9,18 +7,15 @@ import calendar
 import random
 from PIL import Image
 import io
+import streamlit as st
+import pandas as pd
 
-# Configuración de la página
-st.set_page_config(
-    page_title="Finanzas PYMEs",
-    page_icon="💼",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(page_title="Finanzas PYMEs", layout="wide")
 
-# Estilos CSS personalizados
+# Estilos CSS personalizados actualizados con mejor contraste
 st.markdown("""
 <style>
+    /* Mejora general de contraste */
     .main-header {
         font-size: 2.5rem;
         color: #1E88E5;
@@ -31,51 +26,99 @@ st.markdown("""
     }
     .sub-header {
         font-size: 1.8rem;
-        color: #424242;
+        color: #FFFFFF;
         margin-top: 1rem;
         margin-bottom: 1rem;
     }
     .card {
         padding: 1.5rem;
         border-radius: 10px;
-        background-color: #fff;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: #2C3038;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         margin-bottom: 1rem;
+        border: 1px solid #3A3F48;
     }
     .metric-value {
         font-size: 2rem;
         font-weight: bold;
-        color: #0277BD;
+        color: #4FC3F7;
     }
     .metric-label {
         font-size: 1rem;
-        color: #616161;
+        color: #E0E0E0;
+        font-weight: bold;
     }
     .metric-delta-positive {
         color: #4CAF50;
         font-size: 0.9rem;
+        font-weight: bold;
     }
     .metric-delta-negative {
         color: #F44336;
         font-size: 0.9rem;
+        font-weight: bold;
     }
-    .sidebar .sidebar-content {
-        background-color: #f8f9fa;
+    
+    /* Mejora del menú de navegación lateral */
+    .css-1d391kg, .css-1lcbmhc {
+        background-color: #1E1E1E !important;
     }
+    .css-1oe6o3n {
+        color: #FFFFFF !important;
+    }
+    .css-pkbazv {
+        color: #E0E0E0 !important;
+    }
+    
+    /* Mejora de tabs */
     .stTabs [data-baseweb="tab-list"] {
         gap: 2px;
     }
     .stTabs [data-baseweb="tab"] {
         height: 50px;
         white-space: pre-wrap;
-        background-color: #f0f2f6;
+        background-color: #2C3038;
         border-radius: 4px 4px 0px 0px;
         padding: 10px 16px;
         font-size: 16px;
+        color: #E0E0E0;
+        font-weight: bold;
     }
     .stTabs [aria-selected="true"] {
         background-color: #1E88E5;
         color: white;
+        font-weight: bold;
+    }
+    
+    /* Mejora de tablas */
+    .dataframe {
+        background-color: #2C3038 !important;
+        color: #E0E0E0 !important;
+    }
+    .dataframe th {
+        background-color: #1E88E5 !important;
+        color: white !important;
+        font-weight: bold !important;
+    }
+    .dataframe td {
+        border-color: #3A3F48 !important;
+    }
+    
+    /* Mejora de inputs y selects */
+    .stTextInput>div>div>input, .stSelectbox>div>div {
+        background-color: #2C3038 !important;
+        color: #E0E0E0 !important;
+        border: 1px solid #3A3F48 !important;
+    }
+    
+    /* Mejora de texto general */
+    h1, h2, h3, h4, h5, h6, p, li {
+        color: #E0E0E0 !important;
+    }
+    
+    /* Mejora de iconos en el menú */
+    .css-1kyxreq {
+        color: #4FC3F7 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -889,16 +932,16 @@ elif opciones == "Facturas":
         col1, col2 = st.columns(2)
         
         with col1:
-            cliente = st.text_input("Cliente")
-            fecha_emision = st.date_input("Fecha de Emisión", datetime.now())
-            dias_vencimiento = st.number_input("Días para Vencimiento", min_value=0, value=30)
+            cliente = st.text_input("Cliente", key="factura_nuevo_cliente")
+            fecha_emision = st.date_input("Fecha de Emisión", datetime.now(), key="factura_fecha_emision")
+            dias_vencimiento = st.number_input("Días para Vencimiento", min_value=0, value=30, key="factura_dias_vencimiento")
             fecha_vencimiento = fecha_emision + timedelta(days=dias_vencimiento)
             st.info(f"Fecha de vencimiento: {fecha_vencimiento.strftime('%d/%m/%Y')}")
             
         with col2:
-            nif_cliente = st.text_input("NIF/CIF Cliente")
-            direccion = st.text_area("Dirección de Facturación", height=100)
-            forma_pago = st.selectbox("Forma de Pago", ["Transferencia Bancaria", "Domiciliación", "Efectivo", "Tarjeta", "PayPal"])
+            nif_cliente = st.text_input("NIF/CIF Cliente", key="factura_nif_cliente")
+            direccion = st.text_area("Dirección de Facturación", height=100, key="factura_direccion")
+            forma_pago = st.selectbox("Forma de Pago", ["Transferencia Bancaria", "Domiciliación", "Efectivo", "Tarjeta", "PayPal"], key="factura_forma_pago")
         
         # Tabla para añadir conceptos
         st.markdown("<h3>Conceptos</h3>", unsafe_allow_html=True)
@@ -1281,24 +1324,33 @@ elif opciones == "Informes":
         
         # Estilos personalizados para filas específicas
         def estilo_fila(row):
-            if row['concepto'].startswith('A)') or row['concepto'].startswith('B)') or row['concepto'].startswith('C)') or row['concepto'].startswith('D)'):
+            if 'concepto' in row.index:  # Verifica si la columna existe
+                if row.get('concepto', '').startswith(('A)', 'B)', 'C)', 'D)')):
                 return ['background-color: #E3F2FD; font-weight: bold;'] * len(row)
             return [''] * len(row)
         
         # Mostrar tabla
         st.markdown("<h3>Cuenta de Resultados</h3>", unsafe_allow_html=True)
         
-        st.dataframe(
-            df_cr[['concepto', 'valor_str', 'porcentaje_str']].rename(
+        if 'concepto' in df_cr.columns:
+            styled_df = df_cr[['concepto', 'valor_str', 'porcentaje_str']].rename(
                 columns={
                     'concepto': 'Concepto',
                     'valor_str': 'Valor',
                     'porcentaje_str': '% sobre ventas'
                 }
-            ).style.apply(estilo_fila, axis=1),
-            use_container_width=True,
-            height=500
-        )
+            ).style.apply(estilo_fila, axis=1)
+        else:
+            # Usa un enfoque alternativo si 'concepto' no está en el DataFrame
+            styled_df = df_cr.rename(
+                columns={
+                    'concepto': 'Concepto',
+                    'valor_str': 'Valor',
+                    'porcentaje_str': '% sobre ventas'
+                }
+            )
+
+        st.dataframe(styled_df, use_container_width=True, height=500)
         
         # Gráfico de comparación con periodo anterior
         st.markdown("<h3>Comparativa con Periodo Anterior</h3>", unsafe_allow_html=True)
